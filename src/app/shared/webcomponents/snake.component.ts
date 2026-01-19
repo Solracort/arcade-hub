@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { BaseGameComponent } from '../webcomponents/base-game.component';
+import { BaseGameComponent } from './base-game.component';
 
 @Component({
   selector: 'app-snake',
@@ -24,20 +24,39 @@ import { BaseGameComponent } from '../webcomponents/base-game.component';
           </div>
         </div>
 
-        <!-- Controls -->
+        <!-- Mobile Controls -->
+        <div class="mobile-controls">
+          <button class="control-btn up" (click)="moveSnake('up')" [disabled]="gameOver">
+            <span class="material-symbols-outlined">arrow_upward</span>
+          </button>
+          <div class="control-row">
+            <button class="control-btn left" (click)="moveSnake('left')" [disabled]="gameOver">
+              <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <button class="control-btn down" (click)="moveSnake('down')" [disabled]="gameOver">
+              <span class="material-symbols-outlined">arrow_downward</span>
+            </button>
+            <button class="control-btn right" (click)="moveSnake('right')" [disabled]="gameOver">
+              <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Game Controls -->
         <div class="controls">
-          <button (click)="togglePause()" class="btn btn-outline">
-            {{ isPaused ? 'Resume' : 'Pause' }}
+          <button (click)="togglePause()" class="btn btn-outline" [disabled]="gameOver">
+            {{ isPaused ? 'Reanudar' : 'Pausa' }}
           </button>
           <button (click)="newGame()" class="btn btn-primary">
-            New Game
+            Nuevo Juego
           </button>
         </div>
 
         <!-- Info -->
         <div class="game-info">
-          <span *ngIf="gameOver" class="game-over">GAME OVER</span>
-          <span *ngIf="!gameOver" class="status">Use arrow keys to move</span>
+          <span *ngIf="gameOver" class="game-over">GAME OVER - Puntuación: {{ score }}</span>
+          <span *ngIf="!gameOver && isPaused" class="status">PAUSADO</span>
+          <span *ngIf="!gameOver && !isPaused" class="status">{{ score }} Puntos</span>
         </div>
       </div>
     </app-base-game>
@@ -49,6 +68,7 @@ import { BaseGameComponent } from '../webcomponents/base-game.component';
       align-items: center;
       gap: var(--spacing-lg);
       width: 100%;
+      padding: var(--spacing-lg);
     }
 
     .game-board {
@@ -60,11 +80,12 @@ import { BaseGameComponent } from '../webcomponents/base-game.component';
       border: 2px solid var(--color-primary);
       border-radius: var(--radius-md);
       box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+      width: 100%;
+      max-width: 400px;
+      aspect-ratio: 1;
     }
 
     .grid-cell {
-      width: 2rem;
-      height: 2rem;
       background-color: var(--color-bg-dark);
       border: 1px solid rgba(0, 212, 255, 0.1);
       border-radius: 2px;
@@ -89,10 +110,79 @@ import { BaseGameComponent } from '../webcomponents/base-game.component';
       50% { transform: scale(1.1); }
     }
 
+    /* Mobile Controls - D-Pad Style */
+    .mobile-controls {
+      display: grid;
+      grid-template-columns: repeat(3, 60px);
+      grid-template-rows: repeat(3, 60px);
+      gap: 8px;
+      background: rgba(0, 212, 255, 0.05);
+      padding: var(--spacing-lg);
+      border: 2px solid var(--color-primary);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+    }
+
+    .control-btn {
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 212, 255, 0.05));
+      border: 2px solid var(--color-primary);
+      border-radius: 8px;
+      color: var(--color-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      transition: all 0.2s ease;
+      padding: 0;
+
+      &:hover:not(:disabled) {
+        background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.1));
+        box-shadow: 0 0 12px rgba(0, 212, 255, 0.5);
+        transform: scale(1.05);
+      }
+
+      &:active:not(:disabled) {
+        transform: scale(0.95);
+        box-shadow: inset 0 0 8px rgba(0, 212, 255, 0.4);
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+
+    .control-btn.up {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .control-row {
+      grid-column: 1 / 4;
+      grid-row: 2;
+      display: grid;
+      grid-template-columns: repeat(3, 60px);
+      gap: 8px;
+    }
+
+    .control-btn.left {
+      grid-column: 1;
+    }
+
+    .control-btn.down {
+      grid-column: 2;
+    }
+
+    .control-btn.right {
+      grid-column: 3;
+    }
+
     .controls {
       display: flex;
       gap: var(--spacing-md);
       justify-content: center;
+      flex-wrap: wrap;
     }
 
     .game-info {
@@ -100,10 +190,12 @@ import { BaseGameComponent } from '../webcomponents/base-game.component';
       align-items: center;
       justify-content: center;
       min-height: 2rem;
-      font-size: 0.875rem;
+      font-size: 1rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      width: 100%;
+      max-width: 400px;
     }
 
     .game-over {
@@ -112,28 +204,57 @@ import { BaseGameComponent } from '../webcomponents/base-game.component';
     }
 
     .status {
-      color: var(--color-text-muted);
+      color: var(--color-primary);
+      text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
     }
 
     @media (max-width: 768px) {
       .game-board {
-        grid-template-columns: repeat(12, 1fr);
+        max-width: 100%;
       }
 
-      .grid-cell {
-        width: 1.5rem;
-        height: 1.5rem;
+      .mobile-controls {
+        grid-template-columns: repeat(3, 50px);
+        grid-template-rows: repeat(3, 50px);
+        gap: 6px;
+      }
+
+      .control-btn {
+        width: 50px;
+        height: 50px;
+      }
+
+      .control-row {
+        grid-template-columns: repeat(3, 50px);
       }
     }
 
     @media (max-width: 480px) {
-      .game-board {
-        grid-template-columns: repeat(10, 1fr);
+      .snake-game {
+        padding: var(--spacing-md);
+        gap: var(--spacing-md);
       }
 
-      .grid-cell {
-        width: 1.25rem;
-        height: 1.25rem;
+      .game-board {
+        max-width: 90vw;
+      }
+
+      .mobile-controls {
+        grid-template-columns: repeat(3, 45px);
+        grid-template-rows: repeat(3, 45px);
+        gap: 5px;
+        padding: var(--spacing-md);
+      }
+
+      .control-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1.2rem;
+      }
+
+      .control-row {
+        grid-template-columns: repeat(3, 45px);
+        gap: 5px;
       }
     }
   `]
@@ -270,6 +391,25 @@ export class SnakeComponent implements OnInit, OnDestroy {
           break;
       }
     });
+  }
+
+  moveSnake(direction: 'up' | 'down' | 'left' | 'right'): void {
+    if (this.gameOver || this.isPaused) return;
+
+    switch (direction) {
+      case 'up':
+        if (this.direction.y === 0) this.nextDirection = { x: 0, y: -1 };
+        break;
+      case 'down':
+        if (this.direction.y === 0) this.nextDirection = { x: 0, y: 1 };
+        break;
+      case 'left':
+        if (this.direction.x === 0) this.nextDirection = { x: -1, y: 0 };
+        break;
+      case 'right':
+        if (this.direction.x === 0) this.nextDirection = { x: 1, y: 0 };
+        break;
+    }
   }
 
   togglePause(): void {

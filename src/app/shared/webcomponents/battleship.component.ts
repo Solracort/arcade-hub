@@ -265,6 +265,7 @@ const SHIPS = [
       border-radius: var(--radius-lg);
       width: 100%;
       aspect-ratio: 1;
+      touch-action: manipulation;
     }
 
     .board.disabled {
@@ -278,12 +279,19 @@ const SHIPS = [
       border: 1px solid var(--color-border-light);
       border-radius: 2px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 0.7rem;
       font-weight: 700;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .cell:active {
+      transform: scale(0.95);
     }
 
     .cell:hover:not(.attacked):not(.ship):not(.ally-ship) {
@@ -450,17 +458,67 @@ const SHIPS = [
 
       .boards-container {
         grid-template-columns: 1fr;
+        max-width: 100%;
       }
     }
 
     @media (max-width: 768px) {
+      .battleship-game {
+        padding: var(--spacing-md);
+      }
+
+      .boards-container {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+        max-width: 100%;
+      }
+
       .board {
         max-width: 100%;
         width: 90vw;
+        padding: var(--spacing-sm);
+        gap: 1px;
+      }
+
+      .cell {
+        font-size: 0.6rem;
       }
 
       .game-info-panel {
         width: 100%;
+        max-width: 100%;
+        position: static;
+        margin-bottom: var(--spacing-lg);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .battleship-game {
+        padding: var(--spacing-sm);
+        gap: var(--spacing-md);
+      }
+
+      .board {
+        width: 95vw;
+        padding: 4px;
+        gap: 1px;
+      }
+
+      .cell {
+        font-size: 0.5rem;
+        min-height: 25px;
+      }
+
+      .game-info-panel {
+        padding: var(--spacing-md);
+      }
+
+      .game-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .rules-box {
+        display: none;
       }
     }
   `]
