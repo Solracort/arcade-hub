@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BaseGameComponent } from '../webcomponents/base-game.component';
+import { WordsService } from '../../core/services/words.service';
 
 @Component({
   selector: 'app-hangman',
@@ -23,11 +24,19 @@ import { BaseGameComponent } from '../webcomponents/base-game.component';
             <path class="gallows-line" d="M30 10 L70 10"></path>
             <path class="gallows-line" d="M70 10 L70 25"></path>
             
-            <!-- Hangman Parts -->
-            <circle class="hangman-part" [class.show]="lives <= 2" cx="70" cy="35" r="10"></circle>
-            <path class="hangman-part" [class.show]="lives <= 1" d="M70 45 L70 75"></path>
-            <path class="hangman-part" [class.show]="lives <= 0" d="M70 50 L55 65"></path>
-            <path class="hangman-part" [class.show]="lives < 0" d="M70 50 L85 65"></path>
+            <!-- Hangman Parts - 6 partes para 6 vidas -->
+            <!-- Cabeza -->
+            <circle class="hangman-part" [class.show]="lives <= 5" cx="70" cy="35" r="10"></circle>
+            <!-- Cuerpo -->
+            <path class="hangman-part" [class.show]="lives <= 4" d="M70 45 L70 75"></path>
+            <!-- Brazo izquierdo -->
+            <path class="hangman-part" [class.show]="lives <= 3" d="M70 50 L55 65"></path>
+            <!-- Brazo derecho -->
+            <path class="hangman-part" [class.show]="lives <= 2" d="M70 50 L85 65"></path>
+            <!-- Pierna izquierda -->
+            <path class="hangman-part" [class.show]="lives <= 1" d="M70 75 L55 90"></path>
+            <!-- Pierna derecha -->
+            <path class="hangman-part" [class.show]="lives <= 0" d="M70 75 L85 90"></path>
           </svg>
         </div>
 
@@ -47,7 +56,7 @@ import { BaseGameComponent } from '../webcomponents/base-game.component';
             <button class="key" *ngFor="let key of row"
                     [class.used]="usedLetters.includes(key)"
                     (click)="guessLetter(key)"
-                    [disabled]="usedLetters.includes(key)">
+                    [disabled]="usedLetters.includes(key) || gameOver">
               {{ key }}
             </button>
           </div>
@@ -266,14 +275,15 @@ import { BaseGameComponent } from '../webcomponents/base-game.component';
   `]
 })
 export class HangmanComponent {
-  words = ['HANGMAN', 'ARCADE', 'GAMING', 'RETRO', 'NEON', 'PIXEL', 'CONSOLE', 'JOYSTICK'];
+  words: string[] = [];
   currentWord: string = '';
   displayWord: string[] = [];
   usedLetters: string[] = [];
   score: number = 0;
-  lives: number = 3;
+  lives: number = 6;
   gameOver: boolean = false;
   isWin: boolean = false;
+  difficulty: 'easy' | 'medium' | 'hard' = 'easy';
 
   keyboardRows = [
     ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
@@ -281,15 +291,19 @@ export class HangmanComponent {
     ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
   ];
 
+  constructor(private wordsService: WordsService) {
+    this.words = this.wordsService.getAllHangmanWords(this.difficulty);
+  }
+
   ngOnInit(): void {
     this.newGame();
   }
 
   newGame(): void {
-    this.currentWord = this.words[Math.floor(Math.random() * this.words.length)];
+    this.currentWord = this.wordsService.getHangmanWord(this.difficulty);
     this.displayWord = Array(this.currentWord.length).fill('_');
     this.usedLetters = [];
-    this.lives = 3;
+    this.lives = 6;
     this.score = 0;
     this.gameOver = false;
     this.isWin = false;
@@ -316,8 +330,8 @@ export class HangmanComponent {
     } else {
       this.lives--;
 
-      // Check if lost
-      if (this.lives < 0) {
+      // Check if lost - Después de mostrar el muñeco completo
+      if (this.lives <= 0) {
         this.gameOver = true;
         this.isWin = false;
       }

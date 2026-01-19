@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BaseGameComponent } from '../webcomponents/base-game.component';
+import { WordsService } from '../../core/services/words.service';
 
 @Component({
   selector: 'app-wordle',
@@ -219,7 +220,6 @@ import { BaseGameComponent } from '../webcomponents/base-game.component';
   `]
 })
 export class WordleComponent implements OnInit {
-  private words = ['ANGULAR', 'ARCADE', 'GAMING', 'SCRIPT', 'NEON', 'PIXEL', 'SOUND', 'GAMES'];
   secretWord: string = '';
   
   guesses: Array<{ letters: string[], status: string[] }> = [];
@@ -231,14 +231,14 @@ export class WordleComponent implements OnInit {
   gameOver: boolean = false;
   won: boolean = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private wordsService: WordsService) {}
 
   ngOnInit(): void {
     this.newGame();
   }
 
   newGame(): void {
-    this.secretWord = this.words[Math.floor(Math.random() * this.words.length)];
+    this.secretWord = this.wordsService.getWordleWord();
     this.guesses = [];
     this.currentGuess = '';
     this.score = 0;

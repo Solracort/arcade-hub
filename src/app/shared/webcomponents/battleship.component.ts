@@ -89,7 +89,9 @@ const SHIPS = [
                 <div class="cell" 
                   *ngFor="let i of getBoardPositions()"
                   [ngClass]="getCellClass(i, false)"
-                  (click)="onCellClick(i, true)">
+                  (click)="onCellClick(i, true)"
+                  (touchstart)="onCellTouch(i, true, $event)"
+                  (touchend)="onCellTouchEnd($event)">
                 </div>
               </div>
             </div>
@@ -279,7 +281,7 @@ const SHIPS = [
       border: 1px solid var(--color-border-light);
       border-radius: 2px;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.1s ease;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -288,10 +290,16 @@ const SHIPS = [
       -webkit-tap-highlight-color: transparent;
       -webkit-user-select: none;
       user-select: none;
+      touch-action: manipulation;
+      position: relative;
     }
 
-    .cell:active {
-      transform: scale(0.95);
+    .cell:active,
+    .cell.touched {
+      transform: scale(0.92);
+      background: rgba(0, 212, 255, 0.3);
+      border-color: var(--color-primary);
+      box-shadow: inset 0 0 8px rgba(0, 212, 255, 0.4);
     }
 
     .cell:hover:not(.attacked):not(.ship):not(.ally-ship) {
@@ -620,6 +628,22 @@ export class BattleshipComponent implements OnInit {
       }
     }
     return true;
+  }
+
+  onCellTouch(position: number, isEnemyBoard: boolean, event: TouchEvent): void {
+    // Agregar feedback visual inmediato en táctil
+    event.preventDefault();
+    const target = event.target as HTMLElement;
+    target.classList.add('touched');
+    
+    // Ejecutar el ataque
+    this.onCellClick(position, isEnemyBoard);
+  }
+
+  onCellTouchEnd(event: TouchEvent): void {
+    event.preventDefault();
+    const target = event.target as HTMLElement;
+    target.classList.remove('touched');
   }
 
   onCellClick(position: number, isEnemyBoard: boolean): void {

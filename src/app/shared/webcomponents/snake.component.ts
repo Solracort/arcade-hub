@@ -15,48 +15,57 @@ import { BaseGameComponent } from './base-game.component';
       (backClicked)="goBack()">
       
       <div class="snake-game">
-        <!-- Game Canvas -->
-        <div class="game-board">
-          <div class="grid-cell" 
-               *ngFor="let cell of gameGrid; let i = index"
-               [class.snake]="isSnakeCell(i)"
-               [class.food]="isFoodCell(i)">
+        <!-- Game Boy Style Container -->
+        <div class="gameboy-container">
+          <!-- Screen -->
+          <div class="gameboy-screen">
+            <div class="game-board">
+              <div class="grid-cell" 
+                   *ngFor="let cell of gameGrid; let i = index"
+                   [class.snake]="isSnakeCell(i)"
+                   [class.food]="isFoodCell(i)">
+              </div>
+            </div>
+            <div class="game-info">
+              <span *ngIf="gameOver" class="game-over">GAME OVER - {{ score }}</span>
+              <span *ngIf="!gameOver && isPaused" class="status">PAUSADO</span>
+              <span *ngIf="!gameOver && !isPaused" class="status">{{ score }} Puntos</span>
+            </div>
           </div>
-        </div>
 
-        <!-- Mobile Controls -->
-        <div class="mobile-controls">
-          <button class="control-btn up" (click)="moveSnake('up')" [disabled]="gameOver">
-            <span class="material-symbols-outlined">arrow_upward</span>
-          </button>
-          <div class="control-row">
-            <button class="control-btn left" (click)="moveSnake('left')" [disabled]="gameOver">
-              <span class="material-symbols-outlined">arrow_back</span>
-            </button>
-            <button class="control-btn down" (click)="moveSnake('down')" [disabled]="gameOver">
-              <span class="material-symbols-outlined">arrow_downward</span>
-            </button>
-            <button class="control-btn right" (click)="moveSnake('right')" [disabled]="gameOver">
-              <span class="material-symbols-outlined">arrow_forward</span>
-            </button>
+          <!-- Controls Container -->
+          <div class="controls-container">
+            <!-- D-Pad (Left) -->
+            <div class="dpad-section">
+              <div class="mobile-controls" #dpad>
+                <button class="control-btn up" (click)="moveSnake('up')" (touchstart)="moveSnake('up')" [disabled]="gameOver">
+                  <span class="material-symbols-outlined">arrow_upward</span>
+                </button>
+                <div class="control-row">
+                  <button class="control-btn left" (click)="moveSnake('left')" (touchstart)="moveSnake('left')" [disabled]="gameOver">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                  </button>
+                  <div class="center-spacer"></div>
+                  <button class="control-btn right" (click)="moveSnake('right')" (touchstart)="moveSnake('right')" [disabled]="gameOver">
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                  </button>
+                </div>
+                <button class="control-btn down" (click)="moveSnake('down')" (touchstart)="moveSnake('down')" [disabled]="gameOver">
+                  <span class="material-symbols-outlined">arrow_downward</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Action Buttons (Center-Bottom) -->
+            <div class="buttons-section">
+              <button (click)="togglePause()" (touchstart)="togglePause()" class="action-btn pause-btn" [disabled]="gameOver" title="Pausa/Reanudar">
+                <span class="material-symbols-outlined">{{ isPaused ? 'play_arrow' : 'pause' }}</span>
+              </button>
+              <button (click)="newGame()" (touchstart)="newGame()" class="action-btn start-btn" title="Nuevo Juego">
+                <span class="material-symbols-outlined">refresh</span>
+              </button>
+            </div>
           </div>
-        </div>
-
-        <!-- Game Controls -->
-        <div class="controls">
-          <button (click)="togglePause()" class="btn btn-outline" [disabled]="gameOver">
-            {{ isPaused ? 'Reanudar' : 'Pausa' }}
-          </button>
-          <button (click)="newGame()" class="btn btn-primary">
-            Nuevo Juego
-          </button>
-        </div>
-
-        <!-- Info -->
-        <div class="game-info">
-          <span *ngIf="gameOver" class="game-over">GAME OVER - Puntuación: {{ score }}</span>
-          <span *ngIf="!gameOver && isPaused" class="status">PAUSADO</span>
-          <span *ngIf="!gameOver && !isPaused" class="status">{{ score }} Puntos</span>
         </div>
       </div>
     </app-base-game>
@@ -66,9 +75,37 @@ import { BaseGameComponent } from './base-game.component';
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: var(--spacing-lg);
+      justify-content: center;
       width: 100%;
       padding: var(--spacing-lg);
+      min-height: 100vh;
+    }
+
+    .gameboy-container {
+      background: linear-gradient(135deg, #3a3a3a, #2a2a2a);
+      border: 8px solid #1a1a1a;
+      border-radius: 30px;
+      padding: 30px;
+      box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 0 30px rgba(0, 212, 255, 0.2);
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      position: relative;
+    }
+
+    .gameboy-screen {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.7));
+      border: 4px solid #0a0a0a;
+      border-radius: 12px;
+      padding: var(--spacing-md);
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
     }
 
     .game-board {
@@ -78,11 +115,10 @@ import { BaseGameComponent } from './base-game.component';
       background-color: var(--color-bg-surface);
       padding: var(--spacing-md);
       border: 2px solid var(--color-primary);
-      border-radius: var(--radius-md);
-      box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+      border-radius: 8px;
       width: 100%;
-      max-width: 400px;
       aspect-ratio: 1;
+      box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
     }
 
     .grid-cell {
@@ -90,19 +126,19 @@ import { BaseGameComponent } from './base-game.component';
       border: 1px solid rgba(0, 212, 255, 0.1);
       border-radius: 2px;
       transition: all 0.1s ease;
+    }
 
-      &.snake {
-        background-color: var(--color-primary);
-        box-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
-        border-color: var(--color-primary);
-      }
+    .grid-cell.snake {
+      background-color: var(--color-primary);
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+      border-color: var(--color-primary);
+    }
 
-      &.food {
-        background-color: var(--color-secondary);
-        box-shadow: 0 0 10px rgba(255, 0, 255, 0.8);
-        border-color: var(--color-secondary);
-        animation: food-pulse 0.5s ease-in-out infinite;
-      }
+    .grid-cell.food {
+      background-color: var(--color-secondary);
+      box-shadow: 0 0 10px rgba(255, 0, 255, 0.8);
+      border-color: var(--color-secondary);
+      animation: food-pulse 0.5s ease-in-out infinite;
     }
 
     @keyframes food-pulse {
@@ -110,92 +146,19 @@ import { BaseGameComponent } from './base-game.component';
       50% { transform: scale(1.1); }
     }
 
-    /* Mobile Controls - D-Pad Style */
-    .mobile-controls {
-      display: grid;
-      grid-template-columns: repeat(3, 60px);
-      grid-template-rows: repeat(3, 60px);
-      gap: 8px;
-      background: rgba(0, 212, 255, 0.05);
-      padding: var(--spacing-lg);
-      border: 2px solid var(--color-primary);
-      border-radius: var(--radius-lg);
-      box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
-    }
-
-    .control-btn {
-      background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 212, 255, 0.05));
-      border: 2px solid var(--color-primary);
-      border-radius: 8px;
-      color: var(--color-primary);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      transition: all 0.2s ease;
-      padding: 0;
-
-      &:hover:not(:disabled) {
-        background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.1));
-        box-shadow: 0 0 12px rgba(0, 212, 255, 0.5);
-        transform: scale(1.05);
-      }
-
-      &:active:not(:disabled) {
-        transform: scale(0.95);
-        box-shadow: inset 0 0 8px rgba(0, 212, 255, 0.4);
-      }
-
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-    }
-
-    .control-btn.up {
-      grid-column: 2;
-      grid-row: 1;
-    }
-
-    .control-row {
-      grid-column: 1 / 4;
-      grid-row: 2;
-      display: grid;
-      grid-template-columns: repeat(3, 60px);
-      gap: 8px;
-    }
-
-    .control-btn.left {
-      grid-column: 1;
-    }
-
-    .control-btn.down {
-      grid-column: 2;
-    }
-
-    .control-btn.right {
-      grid-column: 3;
-    }
-
-    .controls {
-      display: flex;
-      gap: var(--spacing-md);
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
     .game-info {
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 2rem;
-      font-size: 1rem;
+      min-height: 28px;
+      padding: 8px;
+      font-size: 0.85rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      width: 100%;
-      max-width: 400px;
+      background: rgba(0, 212, 255, 0.05);
+      border: 1px solid var(--color-border-light);
+      border-radius: 6px;
     }
 
     .game-over {
@@ -208,53 +171,232 @@ import { BaseGameComponent } from './base-game.component';
       text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
     }
 
+    .controls-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      gap: 30px;
+    }
+
+    .dpad-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    .mobile-controls {
+      display: grid;
+      grid-template-columns: repeat(3, 90px);
+      grid-template-rows: repeat(3, 90px);
+      gap: 12px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 25px;
+      border-radius: 20px;
+      border: 3px solid rgba(0, 212, 255, 0.3);
+      touch-action: manipulation;
+    }
+
+    .control-btn {
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 212, 255, 0.08));
+      border: 3px solid var(--color-primary);
+      border-radius: 12px;
+      color: var(--color-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      transition: all 0.15s ease;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .control-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, rgba(0, 212, 255, 0.3), rgba(0, 212, 255, 0.15));
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+      transform: scale(1.08);
+    }
+
+    .control-btn:active:not(:disabled) {
+      transform: scale(0.92);
+      box-shadow: inset 0 0 12px rgba(0, 212, 255, 0.5);
+    }
+
+    .control-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .control-btn.up {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .control-row {
+      grid-column: 1 / 4;
+      grid-row: 2;
+      display: grid;
+      grid-template-columns: repeat(3, 90px);
+      gap: 12px;
+    }
+
+    .control-btn.left {
+      grid-column: 1;
+    }
+
+    .center-spacer {
+      grid-column: 2;
+    }
+
+    .control-btn.right {
+      grid-column: 3;
+    }
+
+    .control-btn.down {
+      grid-column: 2;
+      grid-row: 3;
+    }
+
+    .buttons-section {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      width: 100%;
+    }
+
+    .action-btn {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: 4px solid;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.15), transparent);
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .action-btn:hover:not(:disabled) {
+      transform: scale(1.12);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+    }
+
+    .action-btn:active:not(:disabled) {
+      transform: scale(0.93);
+      box-shadow: inset 0 6px 12px rgba(0, 0, 0, 0.6);
+    }
+
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .pause-btn {
+      border-color: #ff9500;
+      background: radial-gradient(circle at 30% 30%, rgba(255, 149, 0, 0.4), rgba(255, 149, 0, 0.15));
+      color: #ff9500;
+    }
+
+    .start-btn {
+      border-color: #1f883d;
+      background: radial-gradient(circle at 30% 30%, rgba(31, 136, 61, 0.4), rgba(31, 136, 61, 0.15));
+      color: #1f883d;
+    }
+
     @media (max-width: 768px) {
-      .game-board {
+      .gameboy-container {
+        padding: 20px;
+        gap: 20px;
         max-width: 100%;
       }
 
+      .controls-container {
+        gap: 20px;
+      }
+
       .mobile-controls {
-        grid-template-columns: repeat(3, 50px);
-        grid-template-rows: repeat(3, 50px);
-        gap: 6px;
+        grid-template-columns: repeat(3, 75px);
+        grid-template-rows: repeat(3, 75px);
+        gap: 10px;
+        padding: 20px;
       }
 
       .control-btn {
-        width: 50px;
-        height: 50px;
+        width: 75px;
+        height: 75px;
+        font-size: 1.8rem;
       }
 
       .control-row {
-        grid-template-columns: repeat(3, 50px);
+        grid-template-columns: repeat(3, 75px);
+        gap: 10px;
+      }
+
+      .action-btn {
+        width: 95px;
+        height: 95px;
+        font-size: 2rem;
       }
     }
 
     @media (max-width: 480px) {
       .snake-game {
         padding: var(--spacing-md);
-        gap: var(--spacing-md);
       }
 
-      .game-board {
-        max-width: 90vw;
+      .gameboy-container {
+        padding: 15px;
+        gap: 15px;
+        border-width: 6px;
+        border-radius: 20px;
+        max-width: 100%;
+      }
+
+      .controls-container {
+        gap: 15px;
       }
 
       .mobile-controls {
-        grid-template-columns: repeat(3, 45px);
-        grid-template-rows: repeat(3, 45px);
-        gap: 5px;
-        padding: var(--spacing-md);
+        grid-template-columns: repeat(3, 65px);
+        grid-template-rows: repeat(3, 65px);
+        gap: 8px;
+        padding: 15px;
       }
 
       .control-btn {
-        width: 45px;
-        height: 45px;
-        font-size: 1.2rem;
+        width: 65px;
+        height: 65px;
+        font-size: 1.6rem;
       }
 
       .control-row {
-        grid-template-columns: repeat(3, 45px);
-        gap: 5px;
+        grid-template-columns: repeat(3, 65px);
+        gap: 8px;
+      }
+
+      .action-btn {
+        width: 85px;
+        height: 85px;
+        font-size: 1.8rem;
+      }
+
+      .buttons-section {
+        gap: 20px;
       }
     }
   `]
@@ -325,7 +467,6 @@ export class SnakeComponent implements OnInit, OnDestroy {
     let newRow = row + this.direction.y;
     let newCol = col + this.direction.x;
 
-    // Wall collision
     if (newRow < 0 || newRow >= this.gridSize || newCol < 0 || newCol >= this.gridSize) {
       this.endGame();
       return;
@@ -333,7 +474,6 @@ export class SnakeComponent implements OnInit, OnDestroy {
 
     const newHead = newRow * this.gridSize + newCol;
 
-    // Self collision
     if (this.snake.includes(newHead)) {
       this.endGame();
       return;
@@ -341,7 +481,6 @@ export class SnakeComponent implements OnInit, OnDestroy {
 
     this.snake.unshift(newHead);
 
-    // Food collision
     if (newHead === this.food) {
       this.score += 100;
       this.spawnFood();
